@@ -1,0 +1,95 @@
+import pandas as pd
+from statistics import mean
+import matplotlib
+import matplotlib.pyplot as plt
+
+
+file_1 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_0\hello.csv", on_bad_lines='skip')
+file_2 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_20\hello_2.csv", on_bad_lines='skip')
+file_3 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_40\hello_4.csv", on_bad_lines='skip')
+file_4 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_60\hello_6.csv", on_bad_lines='skip')
+file_5 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_80\hello_8.csv", on_bad_lines='skip')
+file_6 = pd.read_csv("E:\SUMO_Out\TUGA_0.1\Av_Lib_1_100\hello_100.csv", on_bad_lines='skip')
+
+list_scenario = [file_1, file_2, file_3, file_4, file_5, file_6]
+
+def my_function(file):
+
+    # print(file)
+
+    file.columns = ["output"]
+
+    selection = {"speed": [], "duration": [], "waiting time": [], "time loss": []}
+
+    for i in range(len(file)):
+        # print(file.iloc[i, 0])
+        if "Speed:" in file.iloc[i, 0]:
+            split_string = file.iloc[i, 0].split()
+            for j in split_string:
+                if not "Speed:" in j:
+                    selection["speed"].append(float(j))
+        
+        if "Duration" in file.iloc[i,0] and not "s" in file.iloc[i,0]:
+            split_string = file.iloc[i, 0].split()
+            for j in split_string:
+                if not "Duration:" in j:
+                    selection["duration"].append(float(j))
+
+        if "WaitingTime:" in file.iloc[i, 0]:
+            split_string = file.iloc[i, 0].split()
+            for j in split_string:
+                if not "WaitingTime:" in j:
+                    selection["waiting time"].append(float(j))
+
+        if "TimeLoss:" in file.iloc[i, 0]:
+            split_string = file.iloc[i, 0].split()
+            for j in split_string:
+                if not "TimeLoss:" in j:
+                    selection["time loss"].append(float(j))
+
+    #df = pd.DataFrame(selection)
+    return(pd.DataFrame(selection))
+
+def function_concat_dfspeed(list_scenario, scenario): 
+    
+    df_list = []
+    for i in list_scenario:
+        df = my_function(i)
+        df_list.append(df[scenario])
+        if len(df_list) == 6:
+           concat = pd.concat(df_list, axis=1)
+           concat.columns = ["0%", "20%", "40%", "60%", "80%", "100%"]
+           return concat
+           
+
+df_speed = function_concat_dfspeed(list_scenario, "speed")      
+boxplot = df_speed.boxplot(column=["0%", "20%", "40%", "60%", "80%", "100%"], grid=True)
+plt.xlabel("% of MEVs")
+plt.ylabel("speed (m/s)")
+plt.title("Average trip speed by % of MEVs")
+plt.show()
+
+df_waitingtime = function_concat_dfspeed(list_scenario, "duration")      
+boxplot = df_waitingtime.boxplot(column=["0%", "20%", "40%", "60%", "80%", "100%"], grid=True)
+plt.xlabel("% of MEVs")
+plt.ylabel("duration (s)")
+plt.title("Average trip duration by % of MEVs")
+plt.show()
+
+df_waitingtime = function_concat_dfspeed(list_scenario, "waiting time")      
+boxplot = df_waitingtime.boxplot(column=["0%", "20%", "40%", "60%", "80%", "100%"], grid=True)
+plt.xlabel("% of MEVs")
+plt.ylabel("waiting time (s)")
+plt.title("Average waiting time by % of MEVs")
+plt.show()
+    
+df_timeloss = function_concat_dfspeed(list_scenario, "time loss")      
+boxplot = df_timeloss.boxplot(column=["0%", "20%", "40%", "60%", "80%", "100%"], grid=True)
+plt.xlabel("% of MEVs")
+plt.ylabel("time loss (s)")
+plt.title("Average time loss by % of MEVs")
+plt.show()
+
+    
+    
+    
